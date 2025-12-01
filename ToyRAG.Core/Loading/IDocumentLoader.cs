@@ -1,4 +1,5 @@
-﻿using ToyRAG.Core.Entities;
+﻿using System.Collections;
+using ToyRAG.Core.Entities;
 
 namespace ToyRAG.Core.Loading
 {
@@ -9,6 +10,6 @@ namespace ToyRAG.Core.Loading
         /// </summary>
         /// <param name="directoryPath">目录路径</param>
         /// <returns>文档列表</returns>
-        List<Document> Load(string directoryPath);
+        IEnumerable<Document> Load(string directoryPath);
     }
 }

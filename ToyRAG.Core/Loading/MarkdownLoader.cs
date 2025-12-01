@@ -5,25 +5,25 @@ namespace ToyRAG.Core.Loading
 {
     public class MarkdownLoader : IDocumentLoader
     {
-        public List<Document> Documents { get; set; } = [];
-        public List<Document> Load(string directoryPath)
+        public IEnumerable<Document> Load(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
                 throw new DirectoryNotFoundException("Directory not found");
 
-            TraverseDirectory(directoryPath);
-            return Documents;
+            foreach (var doc in TraverseDirectory(directoryPath))
+                yield return doc;
         }
 
-        private void TraverseDirectory(string directoryPath)
+        private IEnumerable<Document> TraverseDirectory(string directoryPath)
         {
             foreach (var file in Directory.GetFiles(directoryPath))
             {
-                Documents.Add(ParseDocument(file));
+                yield return ParseDocument(file);
             }
             foreach (var directory in Directory.GetDirectories(directoryPath))
             {
-                TraverseDirectory(directory);
+                foreach (var doc in TraverseDirectory(directory))
+                    yield return doc;
             }
         }
 

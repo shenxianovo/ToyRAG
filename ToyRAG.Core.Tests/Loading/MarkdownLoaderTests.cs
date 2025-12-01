@@ -13,7 +13,7 @@ namespace ToyRAG.Core.Tests.Loading
             var loader = new MarkdownLoader();
             var docs = loader.Load(testDirectoryPath);
 
-            var doc = docs[7];
+            var doc = docs.ElementAt(7);
 
             Assert.IsNotNull(doc.MetaData);
             Assert.IsTrue(doc.MetaData.ContainsKey("title"));

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ToyRAG.Cli/ToyRAG.Cli.csproj" />
+  <Project Path="ToyRAG.Core/ToyRAG.Core.csproj" />
+</Solution>

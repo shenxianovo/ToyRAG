@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="ToyRAG.Cli/ToyRAG.Cli.csproj" />
+  <Project Path="ToyRAG.Core.Tests/ToyRAG.Core.Tests.csproj" Id="a6a4ebb2-6b29-47a3-b3d9-59c5e4236d00" />
   <Project Path="ToyRAG.Core/ToyRAG.Core.csproj" />
 </Solution>

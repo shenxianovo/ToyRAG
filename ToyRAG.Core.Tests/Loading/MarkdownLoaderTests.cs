@@ -20,6 +20,10 @@ namespace ToyRAG.Core.Tests.Loading
             Assert.AreEqual("<dateTimeSerialization> Element", doc.MetaData["title"]);
 
             Assert.Contains("When this property is set to **Local**", doc.Body!);
+
+            string expectedFullPath = Path.GetFullPath("E:\\Code\\Local\\Learning\\C#\\ToyRAG\\data\\docs\\standard\\serialization\\datetimeserialization-element.md");
+            string actualPath = Path.GetFullPath(doc.Source!);
+            Assert.AreEqual(expectedFullPath, actualPath);
         }
     }
 }

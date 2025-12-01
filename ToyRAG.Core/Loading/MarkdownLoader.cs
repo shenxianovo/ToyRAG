@@ -30,7 +30,7 @@ namespace ToyRAG.Core.Loading
         private Document ParseDocument(string filePath)
         {
             var content = File.ReadAllLines(filePath);
-            bool isYamlMode = content[0].Trim() == "---";
+            int id = 0;
             StringBuilder bodyBuilder = new();
             Dictionary<string, object> metaData = [];
 
@@ -103,8 +103,15 @@ namespace ToyRAG.Core.Loading
                         bodyBuilder.AppendLine(line);
                         break;
                 }
+                id++;
             }
-            return new Document { MetaData = metaData, Body = bodyBuilder.ToString() };
+            return new Document
+            {
+                Id = id.ToString(),
+                Body = bodyBuilder.ToString(),
+                Source = filePath,
+                MetaData = metaData
+            };
         }
     }
 }

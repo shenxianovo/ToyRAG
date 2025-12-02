@@ -15,9 +15,9 @@ namespace ToyRAG.Core.Pipelines
         IChatService chatService
     )
     {
-        public async Task ImportAsync(string directoryPath)
+        public async Task ImportAsync(string directoryPath, Action<int, int>? onProgress = null)
         {
-            var docs = documentLoader.Load(directoryPath);
+            var docs = documentLoader.Load(directoryPath, onProgress);
 
             foreach (var doc in docs)
             {

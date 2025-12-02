@@ -1,4 +1,6 @@
-﻿using ToyRAG.Core.Embeddings;
+﻿using Google.Protobuf.WellKnownTypes;
+using System.Collections.Concurrent;
+using ToyRAG.Core.Embeddings;
 using ToyRAG.Core.Generation;
 using ToyRAG.Core.Loading;
 using ToyRAG.Core.Pipelines;
@@ -7,12 +9,12 @@ using ToyRAG.Core.Storage;
 
 string modelPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\all-MiniLM-L12-v2.onnx";
 string vocabPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\vocab.txt";
-string docsPath = @"E:\Code\Local\Learning\C#\ToyRAG\data\docs\standard\serialization";
+string docsPath = @"E:\Code\Local\Learning\C#\ToyRAG\data\docs";
 
 string gitHubToken = "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";
 
 IDocumentLoader documentLoader = new MarkdownLoader();
-ITextSplitter textSplitter = new FixedTextSplitter();
+ITextSplitter textSplitter = new FixedTextSplitter() { ChunkSize = 1000 };
 IEmbeddingGenerator embeddingGenerator = new OnnxEmbeddingGenerator(modelPath, vocabPath, true);
 IVectorStore vectorStore = new InMemoryVectorStore();
 IChatService chatService = new GitHubChatService(gitHubToken);
@@ -27,7 +29,43 @@ RAGPipeline pipeline = new(
 
 Console.WriteLine($"正在从 {docsPath} 导入文档...");
 var watch = System.Diagnostics.Stopwatch.StartNew();
-await pipeline.ImportAsync(docsPath);
+
+// 进度条
+ConcurrentQueue<double> timeIntervals = new();
+double smoothedAvgTimePerDoc = 0;
+Action<int, int> progressCallback = (current, total) =>
+{
+    int barSize = 30;
+    double percent = (double)current / total;
+    int filled = (int)(percent * barSize);
+
+    string bar = new string('=', filled) + new string(' ', barSize - filled);
+
+    if (current > 1)
+    {
+        double elapsedTime = watch.Elapsed.TotalSeconds;
+        double timePerDoc = elapsedTime / current;
+        timeIntervals.Enqueue(timePerDoc);
+
+        if (timeIntervals.Count > 10) // 保留最近 10 次的时间间隔
+        {
+            timeIntervals.TryDequeue(out _);
+        }
+
+        // 使用加权移动平均平滑时间
+        smoothedAvgTimePerDoc = smoothedAvgTimePerDoc == 0
+            ? timePerDoc
+            : smoothedAvgTimePerDoc * 0.9 + timePerDoc * 0.1;
+    }
+
+    // 计算剩余时间
+    int remainingDocs = total - current;
+    TimeSpan remainingTime = TimeSpan.FromSeconds(smoothedAvgTimePerDoc * remainingDocs);
+
+    Console.Write($"\r[{bar}] {current}/{total} ({percent:P0}) 预计剩余时间: {remainingTime:mm\\:ss}");
+};
+
+await pipeline.ImportAsync(docsPath, progressCallback);
 watch.Stop();
 Console.WriteLine($"导入完成！耗时: {watch.Elapsed.TotalSeconds:F2} 秒");
 

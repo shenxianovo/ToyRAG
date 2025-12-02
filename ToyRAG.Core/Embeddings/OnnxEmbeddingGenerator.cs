@@ -37,6 +37,14 @@ namespace ToyRAG.Core.Embeddings
         {
             var tokens = _tokenizer.EncodeToIds(text);
 
+            // BERT 最大支持 512，减去 [CLS] 和 [SEP] 两个特殊 Token，正文最多 510
+            const int MaxLen = 510;
+            if (tokens.Count > MaxLen)
+            {
+                // 截取前 510 个 Token
+                tokens = tokens.Take(MaxLen).ToList();
+            }
+
             int sequenceLength = tokens.Count + 2;
             long[] inputIds = new long[sequenceLength];
             long[] attentionMask = new long[sequenceLength];

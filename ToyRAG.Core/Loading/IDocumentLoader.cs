@@ -10,6 +10,6 @@ namespace ToyRAG.Core.Loading
         /// </summary>
         /// <param name="directoryPath">目录路径</param>
         /// <returns>文档列表</returns>
-        IEnumerable<Document> Load(string directoryPath);
+        IEnumerable<Document> Load(string directoryPath, Action<int, int>? onProgress = null);
     }
 }

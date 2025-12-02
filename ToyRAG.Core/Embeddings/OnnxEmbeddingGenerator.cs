@@ -27,7 +27,7 @@ namespace ToyRAG.Core.Embeddings
             }
         }
 
-        private float[] GenerateEmbeddings(string text)
+        public float[] GenerateEmbeddings(string text)
         {
             var tokens = _tokenizer.EncodeToIds(text);
 

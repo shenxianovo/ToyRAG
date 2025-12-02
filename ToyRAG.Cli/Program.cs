@@ -13,7 +13,7 @@ string gitHubToken = "github_pat_11BA7TCNQ0QRH6LNNsCXQY_bY1QckFp2MTy8AtlFrfiCYBb
 
 IDocumentLoader documentLoader = new MarkdownLoader();
 ITextSplitter textSplitter = new FixedTextSplitter();
-IEmbeddingGenerator embeddingGenerator = new OnnxEmbeddingGenerator(modelPath, vocabPath);
+IEmbeddingGenerator embeddingGenerator = new OnnxEmbeddingGenerator(modelPath, vocabPath, true);
 IVectorStore vectorStore = new InMemoryVectorStore();
 IChatService chatService = new GitHubChatService(gitHubToken);
 

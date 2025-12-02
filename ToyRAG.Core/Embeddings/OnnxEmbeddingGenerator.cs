@@ -10,9 +10,15 @@ namespace ToyRAG.Core.Embeddings
         private readonly InferenceSession _session;
         private readonly BertTokenizer _tokenizer;
 
-        public OnnxEmbeddingGenerator(string modelPath, string vocabPath)
+        public OnnxEmbeddingGenerator(string modelPath, string vocabPath, bool useGpu = false)
         {
-            _session = new(modelPath);
+            var sessionOptions = new SessionOptions();
+            if (useGpu)
+            {
+                sessionOptions.AppendExecutionProvider_CUDA();
+            }
+
+            _session = new(modelPath, sessionOptions);
             _tokenizer = BertTokenizer.Create(vocabPath);
         }
         public async Task GenerateAsync(IEnumerable<TextChunk> chunks)

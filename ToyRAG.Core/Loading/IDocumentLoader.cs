@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using ToyRAG.Core.Entities;
+﻿using ToyRAG.Core.Entities;
 
 namespace ToyRAG.Core.Loading
 {

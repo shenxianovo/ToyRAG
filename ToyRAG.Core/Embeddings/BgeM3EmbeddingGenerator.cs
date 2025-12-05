@@ -1,6 +1,5 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using Microsoft.ML.Tokenizers;
 using ToyRAG.Core.Entities;
 
 namespace ToyRAG.Core.Embeddings

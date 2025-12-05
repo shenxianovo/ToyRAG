@@ -1,5 +1,4 @@
-﻿using ToyRAG.Core.Embeddings;
-using ToyRAG.Core.Entities;
+﻿using ToyRAG.Core.Entities;
 using ToyRAG.Core.Storage;
 
 namespace ToyRAG.Core.Tests;

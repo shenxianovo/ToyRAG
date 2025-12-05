@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using ToyRAG.Core.Loading;
+﻿using ToyRAG.Core.Loading;
 
 namespace ToyRAG.Core.Tests.Loading
 {

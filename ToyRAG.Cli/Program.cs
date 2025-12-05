@@ -7,15 +7,19 @@ using ToyRAG.Core.Pipelines;
 using ToyRAG.Core.Splitting;
 using ToyRAG.Core.Storage;
 
-string modelPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\all-MiniLM-L12-v2.onnx";
-string vocabPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\vocab.txt";
-string docsPath = @"E:\Code\Local\Learning\C#\ToyRAG\data\docs";
+//string modelPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\all-MiniLM-L12-v2\all-MiniLM-L12-v2.onnx";
+string modelPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\bge-m3\model.onnx";
+//string vocabPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\all-MiniLM-L12-v2\vocab.txt";
+string tokenizerPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\bge-m3\tokenizer.json";
+//string docsPath = @"E:\Code\Local\Learning\C#\ToyRAG\data\docs";
+string docsPath = @"E:\Code\Local\Projects\WHUDAYS.github.io";
 
-string gitHubToken = "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";
+string gitHubToken = "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";
 
 IDocumentLoader documentLoader = new MarkdownLoader();
 ITextSplitter textSplitter = new FixedTextSplitter() { ChunkSize = 1000 };
-IEmbeddingGenerator embeddingGenerator = new OnnxEmbeddingGenerator(modelPath, vocabPath, true);
+//IEmbeddingGenerator embeddingGenerator = new OnnxEmbeddingGenerator(modelPath, vocabPath, true);
+IEmbeddingGenerator embeddingGenerator = new BgeM3EmbeddingGenerator(modelPath, tokenizerPath, true);
 IVectorStore vectorStore = new InMemoryVectorStore();
 IChatService chatService = new GitHubChatService(gitHubToken);
 

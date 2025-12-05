@@ -18,7 +18,7 @@ string gitHubToken = "github_pat_11BA7TCNQ0jF3EnevWlnwB_dZx9FNYZSAyRE2bWhfcWFoQt
 
 IDocumentLoader documentLoader = new MarkdownLoader();
 ITextSplitter textSplitter = new FixedTextSplitter() { ChunkSize = 1000 };
-//IEmbeddingGenerator embeddingGenerator = new OnnxEmbeddingGenerator(modelPath, vocabPath, true);
+//IEmbeddingGenerator embeddingGenerator = new MiniLMEmbeddingGenerator(modelPath, vocabPath, true);
 IEmbeddingGenerator embeddingGenerator = new BgeM3EmbeddingGenerator(modelPath, tokenizerPath, true);
 IVectorStore vectorStore = new InMemoryVectorStore();
 IChatService chatService = new GitHubChatService(gitHubToken);

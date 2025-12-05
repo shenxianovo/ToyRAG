@@ -4,12 +4,12 @@ using ToyRAG.Core.Entities;
 namespace ToyRAG.Core.Tests;
 
 [TestClass]
-public class OnnxEmbeddingGeneratorTests
+public class MiniLMEmbeddingGeneratorTests
 {
     [TestMethod]
     public async Task GenerateAsync_ShpuldGenerateEmbeddingsCorrectly()
     {
-        var generator = new OnnxEmbeddingGenerator(
+        var generator = new MiniLMEmbeddingGenerator(
             @"E:\Code\Local\Learning\C#\ToyRAG\models\all-MiniLM-L12-v2.onnx",
             @"E:\Code\Local\Learning\C#\ToyRAG\models\vocab.txt"
         );

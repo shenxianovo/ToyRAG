@@ -5,12 +5,12 @@ using ToyRAG.Core.Entities;
 
 namespace ToyRAG.Core.Embeddings
 {
-    public class OnnxEmbeddingGenerator : IEmbeddingGenerator
+    public class MiniLMEmbeddingGenerator : IEmbeddingGenerator
     {
         private readonly InferenceSession _session;
         private readonly BertTokenizer _tokenizer;
 
-        public OnnxEmbeddingGenerator(string modelPath, string vocabPath, bool useGpu = false)
+        public MiniLMEmbeddingGenerator(string modelPath, string vocabPath, bool useGpu = false)
         {
             var sessionOptions = new SessionOptions();
             if (useGpu)

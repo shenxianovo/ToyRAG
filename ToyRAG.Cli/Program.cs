@@ -1,5 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using ToyRAG.Core.Embeddings;
 using ToyRAG.Core.Generation;
 using ToyRAG.Core.Loading;
@@ -11,10 +10,10 @@ using ToyRAG.Core.Storage;
 string modelPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\bge-m3\model.onnx";
 //string vocabPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\all-MiniLM-L12-v2\vocab.txt";
 string tokenizerPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\bge-m3\tokenizer.json";
-//string docsPath = @"E:\Code\Local\Learning\C#\ToyRAG\data\docs";
-string docsPath = @"E:\Code\Local\Projects\WHUDAYS.github.io";
+Console.WriteLine("请输入文档地址");
+string docsPath = Console.ReadLine()!;
 
-string gitHubToken = "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";
+string gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.User)!;
 
 IDocumentLoader documentLoader = new MarkdownLoader();
 ITextSplitter textSplitter = new FixedTextSplitter() { ChunkSize = 1000 };

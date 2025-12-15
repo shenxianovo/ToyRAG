@@ -17,7 +17,7 @@ namespace ToyRAG.Core.Embeddings
             var sessionOptions = new SessionOptions();
             if (useGpu)
             {
-                sessionOptions.AppendExecutionProvider_CUDA();
+                sessionOptions.AppendExecutionProvider_CUDA(); // CUDA12.x，CUDA13会报错...
             }
 
             _session = new InferenceSession(modelPath, sessionOptions);

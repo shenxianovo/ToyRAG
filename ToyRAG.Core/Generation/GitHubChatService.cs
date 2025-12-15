@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
@@ -7,35 +9,27 @@ namespace ToyRAG.Core.Generation
 {
     public class GitHubChatService : IChatService
     {
-        private readonly ChatClient _client;
+        private readonly AIAgent _agent;
+        private readonly AgentThread _agentThread;
 
-        private const string GitHubEndpoint = "https://models.inference.ai.azure.com";
+        private const string GitHubEndpoint = "https://models.github.ai/inference";
 
-        public GitHubChatService(string githubToken, string model = "gpt-4o")
+        public GitHubChatService(string gitHubToken, string model = "gpt-4o")
         {
-            // 使用 GitHub Token 创建认证信息
-            var credential = new ApiKeyCredential(githubToken);
-
-            // 创建 OpenAIClient，但指向 GitHub 的端点
-            var openAiClient = new OpenAIClient(credential, new OpenAIClientOptions
+            OpenAIClientOptions openAIClientOptions = new()
             {
-                Endpoint = new Uri(GitHubEndpoint)
-            });
-
-            _client = openAiClient.GetChatClient(model);
-        }
-
-        public async Task<string> GenerateAsync(string systemPrompt, string userPrompt)
-        {
-            var messages = new List<ChatMessage>
-            {
-                new SystemChatMessage(systemPrompt),
-                new UserChatMessage(userPrompt)
+                Endpoint = new Uri("https://models.github.ai/inference")
             };
-
-            ChatCompletion completion = await _client.CompleteChatAsync(messages);
-
-            return completion.Content[0].Text;
+            OpenAIClient client = new(new ApiKeyCredential(gitHubToken), openAIClientOptions);
+            _agent = client
+                .GetChatClient("gpt-4o-mini")
+                .CreateAIAgent(
+                    instructions: "你是一个智能助手。请根据提供的参考资料回答用户的问题，回答时请引用数据来源。如果参考资料中没有答案，请直接说不知道。",
+                    name: "Assistant"
+                );
+            _agentThread = _agent.GetNewThread();
         }
+
+        public async Task<string> GenerateAsync(string message) => (await _agent.RunAsync(message, _agentThread)).ToString();
     }
 }

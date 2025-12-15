@@ -39,14 +39,14 @@ namespace ToyRAG.Core.Pipelines
             contextBuilder.AppendLine("参考资料：");
             foreach (var (chunk, score) in topResults)
             {
-                contextBuilder.AppendLine($"--- (相关度: {score:F2}) ---");
+                contextBuilder.AppendLine($"相关度: {score:F2}");
+                contextBuilder.AppendLine($"数据来自：{chunk.Source}");
                 contextBuilder.AppendLine(chunk.Content);
             }
 
-            string systemPrompt = "你是一个智能助手。请根据提供的参考资料回答用户的问题。如果参考资料中没有答案，请直接说不知道。";
-            string userPrompt = $"问题：{question}\n{contextBuilder.ToString()}";
+            string message = $"问题：{question}\n{contextBuilder}";
 
-            return await chatService.GenerateAsync(systemPrompt, userPrompt);
+            return await chatService.GenerateAsync(message);
         }
     }
 }

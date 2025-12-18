@@ -5,6 +5,12 @@ namespace ToyRAG.Core.Storage
     public class InMemoryVectorStore : IVectorStore
     {
         private List<TextChunk> _store = [];
+
+        public Task<bool> IsDocumentIndexedAsync(string source)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task SaveAsync(IEnumerable<TextChunk> chunks)
         {
             foreach (var chunk in chunks)

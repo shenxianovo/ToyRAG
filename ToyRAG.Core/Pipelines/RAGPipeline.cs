@@ -19,8 +19,13 @@ namespace ToyRAG.Core.Pipelines
         {
             var docs = documentLoader.Load(directoryPath, onProgress);
 
+
             foreach (var doc in docs)
             {
+                if (await vectorStore.IsDocumentIndexedAsync(doc.Source!))
+                {
+                    continue;
+                }
                 var chunks = textSplitter.Split(doc).ToList();
                 if (chunks.Count == 0) continue;
 

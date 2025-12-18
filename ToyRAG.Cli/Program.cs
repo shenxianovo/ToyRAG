@@ -10,8 +10,10 @@ using ToyRAG.Core.Storage;
 string modelPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\bge-m3\model.onnx";
 //string vocabPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\all-MiniLM-L12-v2\vocab.txt";
 string tokenizerPath = @"E:\Code\Local\Learning\C#\ToyRAG\models\bge-m3\tokenizer.json";
-Console.WriteLine("请输入文档地址");
-string docsPath = Console.ReadLine()!;
+Console.WriteLine("请输入本地文件夹完整地址");
+//string docsPath = Console.ReadLine()!;
+string testPath = "E:\\Code\\Local\\Learning\\C#\\ToyRAG\\data\\docs\\visual-basic\\getting-started";
+string docsPath = testPath;
 
 string gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.User)!;
 
@@ -19,7 +21,8 @@ IDocumentLoader documentLoader = new MarkdownLoader();
 ITextSplitter textSplitter = new FixedTextSplitter() { ChunkSize = 1000 };
 //IEmbeddingGenerator embeddingGenerator = new MiniLMEmbeddingGenerator(modelPath, vocabPath, true);
 IEmbeddingGenerator embeddingGenerator = new BgeM3EmbeddingGenerator(modelPath, tokenizerPath, true);
-IVectorStore vectorStore = new InMemoryVectorStore();
+//IVectorStore vectorStore = new InMemoryVectorStore();
+IVectorStore vectorStore = new LocalVectorStrore("vectors.db");
 IChatService chatService = new GitHubChatService(gitHubToken);
 
 RAGPipeline pipeline = new(

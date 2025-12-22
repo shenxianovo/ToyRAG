@@ -112,8 +112,15 @@ namespace ToyRAG.Core.Storage
 
         public async Task<bool> IsDocumentIndexedAsync(string source)
         {
-            //throw new NotImplementedException();
-            return true;
+            using var connection = new SQLiteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            string checkQuery = "SELECT 1 FROM Vectors WHERE Source = @Source LIMIT 1";
+            using var command = new SQLiteCommand(checkQuery, connection);
+            command.Parameters.AddWithValue("@Source", source);
+
+            var result = await command.ExecuteScalarAsync();
+            return result != null;
         }
 
         private static byte[] ConvertToBlob(float[] embedding)

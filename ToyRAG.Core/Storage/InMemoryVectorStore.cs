@@ -8,7 +8,7 @@ namespace ToyRAG.Core.Storage
 
         public Task<bool> IsDocumentIndexedAsync(string source)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(_store.Any(x => x.Source == source));
         }
 
         public Task SaveAsync(IEnumerable<TextChunk> chunks)

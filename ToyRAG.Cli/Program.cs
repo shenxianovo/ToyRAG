@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using ToyRAG.Cli.Utils;
 using ToyRAG.Core.Embeddings;
 using ToyRAG.Core.Generation;
 using ToyRAG.Core.Loading;
@@ -23,7 +23,7 @@ ITextSplitter textSplitter = new FixedTextSplitter() { ChunkSize = 1000 };
 IEmbeddingGenerator embeddingGenerator = new BgeM3EmbeddingGenerator(modelPath, tokenizerPath, true);
 //IVectorStore vectorStore = new InMemoryVectorStore();
 IVectorStore vectorStore = new LocalVectorStrore("vectors.db");
-IChatService chatService = new GitHubChatService(gitHubToken);
+IChatService chatService = new GitHubChatService(gitHubToken, middleware:Middleware.FunctionCallMiddleware);
 
 RAGPipeline pipeline = new(
     documentLoader,
@@ -35,43 +35,8 @@ RAGPipeline pipeline = new(
 
 Console.WriteLine($"正在从 {docsPath} 导入文档...");
 var watch = System.Diagnostics.Stopwatch.StartNew();
-
-// 进度条
-ConcurrentQueue<double> timeIntervals = new();
-double smoothedAvgTimePerDoc = 0;
-Action<int, int> progressCallback = (current, total) =>
-{
-    int barSize = 30;
-    double percent = (double)current / total;
-    int filled = (int)(percent * barSize);
-
-    string bar = new string('=', filled) + new string(' ', barSize - filled);
-
-    if (current > 1)
-    {
-        double elapsedTime = watch.Elapsed.TotalSeconds;
-        double timePerDoc = elapsedTime / current;
-        timeIntervals.Enqueue(timePerDoc);
-
-        if (timeIntervals.Count > 10) // 保留最近 10 次的时间间隔
-        {
-            timeIntervals.TryDequeue(out _);
-        }
-
-        // 使用加权移动平均平滑时间
-        smoothedAvgTimePerDoc = smoothedAvgTimePerDoc == 0
-            ? timePerDoc
-            : smoothedAvgTimePerDoc * 0.9 + timePerDoc * 0.1;
-    }
-
-    // 计算剩余时间
-    int remainingDocs = total - current;
-    TimeSpan remainingTime = TimeSpan.FromSeconds(smoothedAvgTimePerDoc * remainingDocs);
-
-    Console.Write($"\r[{bar}] {current}/{total} ({percent:P0}) 预计剩余时间: {remainingTime:mm\\:ss}");
-};
-
-await pipeline.ImportAsync(docsPath, progressCallback);
+var progressBar = new ProgressBar(watch);
+await pipeline.ImportAsync(docsPath, progressBar.ProgressCallback);
 watch.Stop();
 Console.WriteLine($"导入完成！耗时: {watch.Elapsed.TotalSeconds:F2} 秒");
 

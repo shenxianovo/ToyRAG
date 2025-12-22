@@ -42,4 +42,19 @@ public class InMemoryVectorStoreTests
         Assert.AreEqual("Chunk 1", results.First().Chunk.Content);
         Assert.IsGreaterThan(results.First().Score, results.Last().Score);
     }
+
+    [TestMethod]
+    public async Task IsDocumentIndexedAsync_ShouldReturnCorrectStatus()
+    {
+        var vectorStore = new InMemoryVectorStore();
+        var chunks = new List<TextChunk>
+        {
+            new TextChunk { Content = "C1", Source = "file1.txt", Embedding = [1f] }
+        };
+
+        await vectorStore.SaveAsync(chunks);
+
+        Assert.IsTrue(await vectorStore.IsDocumentIndexedAsync("file1.txt"));
+        Assert.IsFalse(await vectorStore.IsDocumentIndexedAsync("file2.txt"));
+    }
 }

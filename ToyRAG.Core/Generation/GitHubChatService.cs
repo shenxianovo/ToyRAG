@@ -1,8 +1,7 @@
-﻿
-using Microsoft.Agents.AI;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Agents.AI;
 using OpenAI;
 using System.ClientModel;
+using ToyRAG.Core.Tools;
 
 namespace ToyRAG.Core.Generation
 {
@@ -10,42 +9,81 @@ namespace ToyRAG.Core.Generation
     {
         private readonly AIAgent _agent;
         private readonly AgentThread _agentThread;
+        private readonly RetrievalTool _retrievalTool;
 
         public GitHubChatService(
             string gitHubToken,
-            string model = "gpt-4o-mini",
-            Func<AIAgent, FunctionInvocationContext, Func<FunctionInvocationContext, CancellationToken, ValueTask<object?>>, CancellationToken, ValueTask<object?>> middleware = null
+            RetrievalTool retrievalTool,
+            string model = "gpt-4o-mini"
             )
         {
+            _retrievalTool = retrievalTool;
+
             OpenAIClientOptions openAIClientOptions = new()
             {
                 Endpoint = new Uri("https://models.github.ai/inference")
             };
             OpenAIClient client = new(new ApiKeyCredential(gitHubToken), openAIClientOptions);
-            _agent = client
-                .GetChatClient(model)
+            
+            // Use basic CreateAIAgent without tools middleware
+            _agent = client.GetChatClient(model)
                 .CreateAIAgent(
                     name: "Assistant",
                     instructions: """
                     你是一个基于检索增强生成（RAG）的问答助手。
-                    你必须严格依据提供的【上下文】回答问题。
 
+                    工作流程：
+                    1. 用户提问。
+                    2. 如果你不知道，请【搜索外部知识】，此时，你**仅**输出一行以 "SEARCH:" 开头的指令：
+                       SEARCH: 你的搜索关键词
+                    3. 如果你不需要搜索（例如通用闲聊），请直接回答。
+                    4. 当你收到搜索结果后，根据结果回答用户问题。
+                    
                     规则：
-                    1. 只能使用上下文中的信息进行回答，不允许使用外部常识或自行推断。
-                    2. 如果上下文中没有足够信息，必须明确回答“根据提供的文档无法确定”，不要编造答案。
-                    3. 回答应简洁、准确，优先给出结论，其次给出依据。
-                    4. 如果问题包含多个子问题，请逐条回答。
-                    5. 不要提及“上下文”“文档编号”等内部实现细节。
+                    - 搜索关键词应精简且核心。
+                    - 严格依据搜索结果回答。
+                    - 如果搜索结果不相关，请告知无法回答。
                     """
                 );
-            if (middleware is not null)
-            {
-                _agent = _agent.AsBuilder().Use(middleware).Build();
-            }
                 
             _agentThread = _agent.GetNewThread();
         }
 
-        public async Task<string> GenerateAsync(string message) => (await _agent.RunAsync(message, _agentThread)).ToString();
+        public async Task<string> GenerateAsync(string message)
+        {
+            // 1. Initial Call
+            var response = await _agent.RunAsync(message, _agentThread);
+            var content = response.ToString()!;
+
+            // 2. Check for Tool Call (Manual Pattern Matching)
+            // This implements the "LLM decides to call retrieval" logic requested.
+            if (content.Trim().StartsWith("SEARCH:", StringComparison.OrdinalIgnoreCase))
+            {
+                var query = content.Split(':', 2)[1].Trim();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"\n[Agent Request] 正在搜索: {query}..."); 
+                Console.ResetColor();
+                
+                var searchResult = await _retrievalTool.SearchAsync(query);
+                
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("\n[搜索结果]");
+                Console.WriteLine(searchResult);
+                Console.ResetColor();
+                
+                // 3. Feed back results to the Agent
+                var followUp = $"""
+                [System: Search Results]
+                {searchResult}
+                
+                请根据以上搜索结果回答用户最初的问题。
+                """;
+
+                response = await _agent.RunAsync(followUp, _agentThread);
+                content = response.ToString()!;
+            }
+
+            return content;
+        }
     }
 }

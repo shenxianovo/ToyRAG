@@ -19,7 +19,6 @@ namespace ToyRAG.Core.Pipelines
         {
             var docs = documentLoader.Load(directoryPath, onProgress);
 
-
             foreach (var doc in docs)
             {
                 if (await vectorStore.IsDocumentIndexedAsync(doc.Source!))
@@ -36,22 +35,9 @@ namespace ToyRAG.Core.Pipelines
 
         public async Task<string> QueryAsync(string question)
         {
-            var queryEmbedding = embeddingGenerator.GenerateEmbeddings(question.ToLowerInvariant());
-
-            var topResults = await vectorStore.SearchAsync(queryEmbedding);
-
-            StringBuilder contextBuilder = new();
-            contextBuilder.AppendLine("参考资料：");
-            foreach (var (chunk, score) in topResults)
-            {
-                contextBuilder.AppendLine($"相关度: {score:F2}");
-                contextBuilder.AppendLine($"数据来自：{chunk.Source}");
-                contextBuilder.AppendLine(chunk.Content);
-            }
-
-            string message = $"问题：{question}\n{contextBuilder}";
-
-            return await chatService.GenerateAsync(message);
+            // Delegating the entire query process to the Agent (ChatService).
+            // The Agent will use its tools to search the vector store if necessary.
+            return await chatService.GenerateAsync(question);
         }
     }
 }
